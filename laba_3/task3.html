@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Математические задачи</title>
+</head>
+<body>
+    <table border="solid">
+        <tr>
+            <td>Задача 13: Введите число N:</td>
+            <td>
+                <input type="text" id="numberN">
+                <input type="button" value="Вычислить M" onclick="calculateM();">
+            </td>
+        </tr>
+        <tr>
+            <td>Результат 13:</td>
+            <td><p id="result13"></p></td>
+        </tr>
+        <tr>
+            <td>Задача 21: Введите число N:</td>
+            <td>
+                <input type="text" id="numberN2">
+                <input type="button" value="Вычислить количество" onclick="calculateMinDigits();">
+            </td>
+        </tr>
+        <tr>
+            <td>Результат 21:</td>
+            <td><p id="result21"></p></td>
+        </tr>
+    </table>
+
+    <script>
+        // Функция для вычисления суммы цифр числа
+        function sumOfDigits(n) {
+            let sum = 0;
+            while (n > 0) {
+                sum += n % 10;
+                n = Math.floor(n / 10);
+            }
+            return sum;
+        }
+
+        // Задача 13: Найти наибольшее M > 1, на которое делится сумма цифр числа N
+        function calculateM() {
+            const n = parseInt(document.getElementById("numberN").value);
+            const sum = sumOfDigits(n);
+            let m = sum - 1;
+            let found = false;
+            
+            while (m > 1) {
+                if (sum % m === 0) {
+                    found = true;
+                    break;
+                }
+                m--;
+            }
+            
+            const result = found ? m : "нет";
+            document.getElementById("result13").innerHTML = result;
+        }
+
+        // Задача 21: Количество цифр с наименьшим значением в числе N
+        function calculateMinDigits() {
+            const n = document.getElementById("numberN2").value;
+            if (!n || isNaN(n)) {
+                document.getElementById("result21").innerHTML = "Введите корректное число";
+                return;
+            }
+            
+            const digits = n.toString().split('').map(Number);
+            const minDigit = Math.min(...digits);
+            const count = digits.filter(d => d === minDigit).length;
+            
+            document.getElementById("result21").innerHTML = count;
+        }
+    </script>
+</body>
+</html>

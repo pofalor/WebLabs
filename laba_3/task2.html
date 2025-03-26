@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Надпись ИКТЗИ</title>
+    <style type="text/css">
+        table {
+            border-collapse: collapse;
+        }
+        td {
+            width: 30px;
+            height: 30px;
+            border: 1px solid black;
+        }
+        .filled {
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Буква И
+        const letterI = [
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 1, 1],
+            [1, 0, 0, 0, 1, 0, 1],
+            [1, 0, 0, 1, 0, 0, 1],
+            [1, 0, 1, 0, 0, 0, 1],
+            [1, 1, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 1]
+        ];
+        
+        // Буква К
+        const letterK = [
+            [1, 0, 0, 0, 1],
+            [1, 0, 0, 1, 0],
+            [1, 0, 1, 0, 0],
+            [1, 1, 0, 0, 0],
+            [1, 0, 1, 0, 0],
+            [1, 0, 0, 1, 0],
+            [1, 0, 0, 0, 1]
+        ];
+        
+        // Буква Т
+        const letterT = [
+            [1, 1, 1, 1, 1],
+            [0, 0, 1, 0, 0],
+            [0, 0, 1, 0, 0],
+            [0, 0, 1, 0, 0],
+            [0, 0, 1, 0, 0],
+            [0, 0, 1, 0, 0],
+            [0, 0, 1, 0, 0]
+        ];
+        
+        // Буква З
+        const letterZ = [
+            [1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1]
+        ];
+        
+        // Собираем все буквы в массив
+        const letters = [letterI, letterK, letterT, letterZ, letterI];
+        const letterSpacing = 2; // Пробелы между буквами
+        
+        document.write("<table>");
+        
+        // Рисуем каждую строку
+        for (let row = 0; row < 7; row++) {
+            document.write("<tr>");
+            
+            // Для каждой буквы
+            for (let letterIdx = 0; letterIdx < letters.length; letterIdx++) {
+                const letter = letters[letterIdx];
+                var letterRow = letter[row];
+                
+                // Рисуем строку буквы
+                for (let col = 0; col < letterRow.length; col++) {
+                    if (letterRow[col] === 1) {
+                        document.write("<td class='filled'></td>");
+                    } else {
+                        document.write("<td></td>");
+                    }
+                }
+                
+                // Добавляем пробелы между буквами (кроме последней)
+                if (letterIdx < letters.length - 1) {
+                    for (let s = 0; s < letterSpacing; s++) {
+                        document.write("<td></td>");
+                    }
+                }
+            }
+            
+            document.write("</tr>");
+        }
+        
+        document.write("</table>");
+    </script>
+</body>
+</html>
