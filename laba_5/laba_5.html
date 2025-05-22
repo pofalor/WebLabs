@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Лабораторная работа №5</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .column {
+            flex: 50%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .graph-container {
+            width: 500px;
+            height: 500px;
+            position: relative;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .controls {
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 5px 10px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        .card {
+            display: inline-block;
+            width: 80px;
+            height: 120px;
+            border: 1px solid #000;
+            border-radius: 5px;
+            margin: 5px;
+            text-align: center;
+            line-height: 120px;
+            font-size: 20px;
+            background-color: white;
+        }
+        .hearts, .diamonds {
+            color: red;
+        }
+        .spades, .clubs {
+            color: black;
+        }
+        .result {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .axis {
+            position: absolute;
+            font-size: 12px;
+        }
+        .grid-line {
+            position: absolute;
+            border-top: 1px dashed #ccc;
+            width: 100%;
+        }
+        .grid-line-vertical {
+            position: absolute;
+            border-left: 1px dashed #ccc;
+            height: 100%;
+        }
+        .point {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: blue;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="column">
+            <h2>График функции 2 - x<sup>3</sup></h2>
+            <div class="controls">
+                <button id="moveLeft">← Влево</button>
+                <button id="moveRight">Вправо →</button>
+                <button id="moveUp">↑ Вверх</button>
+                <button id="moveDown">Вниз ↓</button>
+            </div>
+            <div class="graph-container" id="graph"></div>
+        </div>
+        
+        <div class="column">
+            <h2>Покер: определение флеша</h2>
+            <button id="dealCards">Раздать карты</button>
+            <div id="cards"></div>
+            <div class="result" id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // ========== График функции ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Параметры по умолчанию
+            let params = {
+                x0: 250,
+                y0: 250,
+                k: 20,
+                gridStep: 50
+            };
+
+            // Получение параметров из URI
+            function getUrlParameter(sParam) {
+                var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+                    sURLVariables = sPageURL.split('&'), sParameterName, i;
+                for (i = 0; i < sURLVariables.length; i++) {
+                    sParameterName = sURLVariables[i].split('=');
+                    if (sParameterName[0] === sParam) {
+                        return sParameterName[1] === undefined ? false : sParameterName[1];
+                    }
+                }
+            }
+
+            // Проверка и применение параметров из URI
+            function applyUriParams() {
+                const x0Param = getUrlParameter("x0");
+                const y0Param = getUrlParameter("y0");
+                const kParam = getUrlParameter("k");
+
+                if (x0Param && !isNaN(x0Param)) params.x0 = Number(x0Param);
+                if (y0Param && !isNaN(y0Param)) params.y0 = Number(y0Param);
+                if (kParam && !isNaN(kParam)) params.k = Number(kParam);
+            }
+
+            applyUriParams();
+
+            // Функция для вычисления значения y = 2 - x^3
+            function func(x) {
+                return 2 - Math.pow(x, 3);
+            }
+
+            // Проверка, находится ли точка в пределах графика
+            function isPointInBounds(x, y) {
+                return x >= 0 && x <= 500 && y >= 0 && y <= 500;
+            }
+
+            // Отрисовка графика
+            function drawGraph() {
+                const graphContainer = document.getElementById('graph');
+                graphContainer.innerHTML = '';
+
+                // Отрисовка координатной сетки
+                drawGrid();
+
+                // Отрисовка осей координат
+                drawAxes();
+
+                // Отрисовка графика функции
+                const xStep = 0.1;
+                let x = -5;
+                while (x <= 5) {
+                    const y = func(x);
+                    const screenX = params.x0 + x * params.k;
+                    const screenY = params.y0 - y * params.k;
+                    
+                    // Проверяем, находится ли точка в пределах контейнера
+                    if (isPointInBounds(screenX, screenY)) {
+                        const point = document.createElement('div');
+                        point.className = 'point';
+                        point.style.left = screenX + 'px';
+                        point.style.top = screenY + 'px';
+                        graphContainer.appendChild(point);
+                    }
+                    x += xStep;
+                }
+            }
+
+            // Отрисовка координатной сетки
+            function drawGrid() {
+                const graphContainer = document.getElementById('graph');
+                const width = graphContainer.offsetWidth;
+                const height = graphContainer.offsetHeight;
+
+                // Горизонтальные линии
+                for (let y = 0; y <= height; y += params.gridStep) {
+                    const line = document.createElement('div');
+                    line.className = 'grid-line';
+                    line.style.top = y + 'px';
+                    graphContainer.appendChild(line);
+                }
+
+                // Вертикальные линии
+                for (let x = 0; x <= width; x += params.gridStep) {
+                    const line = document.createElement('div');
+                    line.className = 'grid-line-vertical';
+                    line.style.left = x + 'px';
+                    graphContainer.appendChild(line);
+                }
+            }
+
+            // Отрисовка осей координат
+            function drawAxes() {
+                const graphContainer = document.getElementById('graph');
+                const width = graphContainer.offsetWidth;
+                const height = graphContainer.offsetHeight;
+
+                // Ось X
+                const xAxis = document.createElement('div');
+                xAxis.style.position = 'absolute';
+                xAxis.style.width = width + 'px';
+                xAxis.style.height = '1px';
+                xAxis.style.backgroundColor = 'black';
+                xAxis.style.top = params.y0 + 'px';
+                graphContainer.appendChild(xAxis);
+
+                // Стрелка оси X
+                const xArrow = document.createElement('div');
+                xArrow.style.position = 'absolute';
+                xArrow.style.width = '0';
+                xArrow.style.height = '0';
+                xArrow.style.borderLeft = '5px solid transparent';
+                xArrow.style.borderRight = '5px solid transparent';
+                xArrow.style.borderTop = '10px solid black';
+                xArrow.style.top = (params.y0 - 5) + 'px';
+                xArrow.style.left = (width - 10) + 'px';
+                graphContainer.appendChild(xArrow);
+
+                // Подпись оси X
+                const xLabel = document.createElement('div');
+                xLabel.className = 'axis';
+                xLabel.textContent = 'X';
+                xLabel.style.top = (params.y0 - 20) + 'px';
+                xLabel.style.left = (width - 20) + 'px';
+                graphContainer.appendChild(xLabel);
+
+                // Ось Y
+                const yAxis = document.createElement('div');
+                yAxis.style.position = 'absolute';
+                yAxis.style.width = '1px';
+                yAxis.style.height = height + 'px';
+                yAxis.style.backgroundColor = 'black';
+                yAxis.style.left = params.x0 + 'px';
+                graphContainer.appendChild(yAxis);
+
+                // Стрелка оси Y
+                const yArrow = document.createElement('div');
+                yArrow.style.position = 'absolute';
+                yArrow.style.width = '0';
+                yArrow.style.height = '0';
+                yArrow.style.borderLeft = '5px solid transparent';
+                yArrow.style.borderRight = '5px solid transparent';
+                yArrow.style.borderBottom = '10px solid black';
+                yArrow.style.top = '5px';
+                yArrow.style.left = (params.x0 - 5) + 'px';
+                graphContainer.appendChild(yArrow);
+
+                // Подпись оси Y
+                const yLabel = document.createElement('div');
+                yLabel.className = 'axis';
+                yLabel.textContent = 'Y';
+                yLabel.style.top = '5px';
+                yLabel.style.left = (params.x0 + 10) + 'px';
+                graphContainer.appendChild(yLabel);
+
+                // Подписи значений на осях
+                for (let x = -5; x <= 5; x++) {
+                    if (x !== 0) {
+                        const xMark = document.createElement('div');
+                        xMark.className = 'axis';
+                        xMark.textContent = x;
+                        xMark.style.top = (params.y0 + 5) + 'px';
+                        xMark.style.left = (params.x0 + x * params.k - 5) + 'px';
+                        graphContainer.appendChild(xMark);
+                    }
+                }
+
+                for (let y = -5; y <= 5; y++) {
+                    if (y !== 0) {
+                        const yMark = document.createElement('div');
+                        yMark.className = 'axis';
+                        yMark.textContent = y;
+                        yMark.style.top = (params.y0 - y * params.k - 10) + 'px';
+                        yMark.style.left = (params.x0 - 20) + 'px';
+                        graphContainer.appendChild(yMark);
+                    }
+                }
+
+                // Ноль
+                const zeroMark = document.createElement('div');
+                zeroMark.className = 'axis';
+                zeroMark.textContent = '0';
+                zeroMark.style.top = (params.y0 + 5) + 'px';
+                zeroMark.style.left = (params.x0 - 15) + 'px';
+                graphContainer.appendChild(zeroMark);
+            }
+
+            // Обработчики кнопок управления графиком
+            document.getElementById('moveLeft').addEventListener('click', function() {
+                params.x0 -= 10;
+                drawGraph();
+            });
+
+            document.getElementById('moveRight').addEventListener('click', function() {
+                params.x0 += 10;
+                drawGraph();
+            });
+
+            document.getElementById('moveUp').addEventListener('click', function() {
+                params.y0 -= 10;
+                drawGraph();
+            });
+
+            document.getElementById('moveDown').addEventListener('click', function() {
+                params.y0 += 10;
+                drawGraph();
+            });
+
+            // Первоначальная отрисовка графика
+            drawGraph();
+
+            // ========== Покер ==========
+            const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+            const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+            const forceFlush = false;
+
+            // Функция для генерации случайной карты
+            function generateCard(suit = null) {
+                const cardSuit = suit || suits[Math.floor(Math.random() * suits.length)];
+                const rank = ranks[Math.floor(Math.random() * ranks.length)];
+                return { suit: cardSuit, rank };
+            }
+
+            // Функция для генерации раздачи (5 карт)
+            function generateHand() {
+                const hand = [];
+                
+                if (forceFlush) {
+                    // Генерируем флеш - все карты одной масти
+                    const flushSuit = suits[Math.floor(Math.random() * suits.length)];
+                    while (hand.length < 5) {
+                        const card = generateCard(flushSuit);
+                        // Проверка на уникальность карты в раздаче
+                        const isUnique = !hand.some(c => c.rank === card.rank && c.suit === card.suit);
+                        if (isUnique) {
+                            hand.push(card);
+                        }
+                    }
+                } else {
+                    // Обычная случайная раздача
+                    while (hand.length < 5) {
+                        const card = generateCard();
+                        // Проверка на уникальность карты в раздаче
+                        const isUnique = !hand.some(c => c.rank === card.rank && c.suit === card.suit);
+                        if (isUnique) {
+                            hand.push(card);
+                        }
+                    }
+                }
+                return hand;
+            }
+
+            // Функция для отображения карт
+            function displayCards(hand) {
+                const cardsContainer = document.getElementById('cards');
+                cardsContainer.innerHTML = '';
+                
+                hand.forEach(card => {
+                    const cardElement = document.createElement('div');
+                    cardElement.className = `card ${card.suit}`;
+                    cardElement.textContent = getCardSymbol(card);
+                    cardsContainer.appendChild(cardElement);
+                });
+            }
+
+            // Функция для получения символа карты
+            function getCardSymbol(card) {
+                const suitSymbols = {
+                    'hearts': '♥',
+                    'diamonds': '♦',
+                    'clubs': '♣',
+                    'spades': '♠'
+                };
+                return card.rank + suitSymbols[card.suit];
+            }
+
+            // Функция для проверки на флеш
+            function isFlush(hand) {
+                try {
+                    // Используем map для получения массива мастей
+                    const suits = hand.map(card => card.suit);
+                    
+                    // Проверяем, все ли масти одинаковы
+                    const firstSuit = suits[0];
+                    const allSame = suits.every(suit => suit === firstSuit);
+                    
+                    if (!allSame) {
+                        throw new Error('Это не флеш');
+                    }
+                    
+                    return true;
+                } catch (error) {
+                    // Обработка случая "нет игры"
+                    document.getElementById('result').textContent = error.message;
+                    return false;
+                } finally {
+                    // Этот блок выполнится в любом случае
+                    console.log('Проверка флеша завершена');
+                }
+            }
+
+            // Обработчик кнопки "Раздать карты"
+            document.getElementById('dealCards').addEventListener('click', function() {
+                const hand = generateHand();
+                displayCards(hand);
+                
+                // Проверка на флеш
+                if (isFlush(hand)) {
+                    document.getElementById('result').textContent = 'Флеш! Все карты одной масти.';
+                }
+                
+                // Демонстрация использования splice()
+                // Удалим одну карту из середины и добавим новую
+                if (!forceFlush) { // Не делаем это при принудительном флеше
+                    const removed = hand.splice(2, 1, generateCard());
+                    console.log('Удаленная карта:', removed[0]);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

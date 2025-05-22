@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Редактирование пользователя</title>
+ <meta charset="utf-8" />
+ <style>.field{width:180px;}</style>
+</head>
+<body>
+ <h1>Редактирование задачи</h1>
+ <form action="/api/todos/edit" method="POST">
+ <input type="hidden" name="id" value="#{id}"/>
+ <label>Задача</label><br>
+ <input name="description" value="#{description}" class="field"
+/><br><br>
+ <label>Тэги</label><br>
+ <input name="tags" value="#{tags}" class="field" /><br><br>
+ <input type="submit" value="Отправить" />
+ </form>
+ <a href="/">К списку задач</a>
+</body>
+<html>

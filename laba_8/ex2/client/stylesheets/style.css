@@ -1,0 +1,59 @@
+.tabs a span {
+    display: inline-block;
+    border-radius: 5px 5px 0 0;
+    width: 100px;
+    margin-right: 10px;
+    text-align: center;
+    background: #ddd;
+    padding: 5px;
+}
+
+.tabs a span.active {
+    background: #eee;
+    font-family: "Times New Roman", sans-serif;
+}
+
+.tabs a span:not(.active) {
+    font-family: Courier, sans-serif;
+}
+
+.content p {
+    margin-right: 10px;
+    padding: 5px;
+    border-radius: 30px;
+}
+
+.content li:nth-child(even) {
+    background: lavender;
+}
+
+.content li:nth-child(odd) {
+    background: gainsboro;
+}
+
+.content h3 {
+    color: blueviolet;
+}
+
+td,
+th {
+    padding: 5px;
+    min-width: 90px;
+    max-width: 25%px;
+    text-align: start;
+}
+
+div.contentcrud {
+    # border: 1px solid #333;
+    # border-style: dashed;
+    # max-width: 36%;
+}
+
+.btn {
+    padding: 4px;
+    border: 1px solid #333;
+    background-color: #eee;
+    border-radius: 2px;
+    margin: 5px;
+    cursor: pointer;
+}

@@ -1,0 +1,79 @@
+doctype html
+html
+  head
+    title Редактирование услуги
+    meta(charset="utf-8")
+    style.
+      .field { width: 180px; }
+      .input-group { margin-bottom: 10px; }
+      label { display: block; margin-bottom: 5px; font-weight: bold; }
+      input { width: 100%; padding: 5px; box-sizing: border-box; }
+      .add-button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 14px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 4px;
+      }post
+  body
+    h1 Редактирование услуги
+    form(method="POST" action=`/api/editServices` onsubmit="return submitForm(this)")
+      input(type="hidden" name="id" value=service.id)
+      
+      .input-group
+        label(for="category") Категория:
+        input#category(type="text" name="category" value=service.category required)
+      
+      .input-group
+        label(for="master") Мастер:
+        input#master(type="text" name="master" value=service.master required)
+      
+      .input-group
+        label(for="name") Название услуги:
+        input#name(type="text" name="name" value=service.name required)
+      
+      .input-group
+        label(for="price") Цена:
+        input#price(type="number" name="price" value=service.price required)
+      
+      .input-group
+        label(for="date") Дата:
+        input#date(type="date" name="date" value=service.date required)
+      
+      .input-group
+        label(for="time") Время:
+        input#time(type="time" name="time" value=service.time required)
+      
+      button.add-button(type="submit") Сохранить изменения
+      a.add-button(href="/" style="background-color: #f44336; margin-left: 10px;") Отмена
+
+      script.
+        function submitForm(form) {
+          const formData = new FormData(form);
+          const object = {};
+          formData.forEach((value, key) => object[key] = value);
+          
+          fetch(form.action, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-HTTP-Method-Override': 'PUT'
+            },
+            body: JSON.stringify(object)
+          })
+          .then(response => {
+            if (response.redirected) {
+              window.location.href = response.url;
+              alert("Услуга успешно обновлена!");
+            }
+          })
+          .catch(error => console.error('Error:', error));
+          
+          return false;
+       }

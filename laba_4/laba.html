@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Лабораторная работа №4</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px 0;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+        }
+        .result {
+            font-weight: bold;
+            color: darkblue;
+        }
+    </style>
+</head>
+<body>
+    <h1>Лабораторная работа №4</h1>
+    
+    <!-- Дата и время -->
+    <div class="section">
+        <h2>Текущая дата</h2>
+        <table id="currentDateTable">
+            <tr>
+                <td id="dateCell"></td>
+            </tr>
+            <tr>
+                <td id="dayCell"></td>
+            </tr>
+        </table>
+    </div>
+    
+    <!-- Дни до сессии -->
+    <div class="section">
+        <h2>Дней до сессии (10 июня 2025 года):</h2>
+        <input type="text" id="daysToSession" disabled>
+    </div>
+    
+    <!-- Памятная дата -->
+    <div class="section">
+        <h2>Памятная дата</h2>
+        <button onclick="askMemorableDate()">Ввести памятную дату</button>
+        <p id="memorableDate"></p>
+    </div>
+    
+    <!-- Последовательность -->
+    <div class="section">
+        <h2>Сумма последовательности (n-2)²</h2>
+        <p>Введите начальный номер и количество членов через запятую (например: 3,5):</p>
+        <input type="text" id="sequenceParams">
+        <button onclick="calculateSequenceSum()">Вычислить сумму</button>
+        <p>Результат: <span id="sequenceResult" class="result">0</span></p>
+    </div>
+    
+    <!-- Подсчет нулей -->
+    <div class="section">
+        <h2>Подсчет нулей в младших разрядах числа</h2>
+        <p>Введите натуральное число N (N > 9):</p>
+        <input type="text" id="numberInput">
+        <button onclick="countTrailingZeros()">Посчитать нули</button>
+        <p>Количество нулей в младших разрядах: <span id="zeroCount" class="result">0</span></p>
+    </div>
+
+    <script>
+        // Инициализация даты и дней до сессии при загрузке страницы
+        window.onload = function() {
+            updateCurrentDate();
+            updateDaysToSession();
+        };
+        
+        // Массивы для месяцев и дней недели
+        const months = [
+            "января", "февраля", "марта", "апреля", 
+            "мая", "июня", "июля", "августа", 
+            "сентября", "октября", "ноября", "декабря"
+        ];
+        
+        const weekDays = [
+            "воскресенье", "понедельник", "вторник", 
+            "среда", "четверг", "пятница", "суббота"
+        ];
+        
+        // Обновление текущей даты
+        function updateCurrentDate() {
+            const now = new Date();
+            const dateCell = document.getElementById("dateCell");
+            const dayCell = document.getElementById("dayCell");
+            
+            dateCell.textContent = now.getDate() + " " + months[now.getMonth()] + " " + now.getFullYear() + " года";
+            dayCell.textContent = weekDays[now.getDay()];
+        }
+        
+        // Расчет дней до сессии (10 июня 2025)
+        function updateDaysToSession() {
+            const now = new Date();
+            const sessionDate = new Date(2025, 5, 10); // Месяцы 0-11
+            
+            // Разница в миллисекундах
+            const diff = sessionDate.getTime() - now.getTime();
+            
+            // Пересчет в дни
+            const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+            
+            document.getElementById("daysToSession").value = days;
+        }
+        
+        // Запрос памятной даты
+        function askMemorableDate() {
+            const year = prompt("Введите год памятной даты:");
+            if (!year) return;
+            
+            const month = prompt("Введите месяц памятной даты (1-12):");
+            if (!month) return;
+            
+            const day = prompt("Введите день памятной даты:");
+            if (!day) return;
+            
+            // Проверка корректности ввода
+            if (!isValidDateInput(year, month, day)) {
+                alert("Некорректный ввод даты!");
+                return;
+            }
+            
+            const date = new Date(year, month-1, day);
+            const output = day + " " + months[date.getMonth()] + " " + year + " года (" + weekDays[date.getDay()] + ")";
+            
+            document.getElementById("memorableDate").textContent = output;
+        }
+        
+        // Проверка корректности ввода даты
+        function isValidDateInput(year, month, day) {
+            // Проверка, что все значения - числа
+            if (!isNumeric(year) || !isNumeric(month) || !isNumeric(day)) {
+                return false;
+            }
+            
+            // Преобразование в числа
+            const y = parseInt(year);
+            const m = parseInt(month);
+            const d = parseInt(day);
+            
+            // Проверка диапазонов
+            if (m < 1 || m > 12) return false;
+            if (d < 1 || d > 31) return false;
+            
+            // Проверка для конкретных месяцев
+            if ((m === 4 || m === 6 || m === 9 || m === 11) && d > 30) return false;
+            if (m === 2) {
+                // Проверка для февраля с учетом високосного года
+                const isLeap = (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+                if (d > (isLeap ? 29 : 28)) return false;
+            }
+            
+            return true;
+        }
+        
+        // Проверка, является ли строка числом (без использования parseFloat)
+        function isNumeric(str) {
+            if (typeof str != "string") return false;
+            return !isNaN(str) && !isNaN(parseFloat(str));
+        }
+        
+        // Расчет суммы последовательности
+        function calculateSequenceSum() {
+            const input = document.getElementById("sequenceParams").value.trim();
+            const parts = input.split(",");
+            
+            if (parts.length !== 2) {
+                alert("Введите два числа через запятую!");
+                return;
+            }
+            
+            const start = parts[0].trim();
+            const count = parts[1].trim();
+            
+            if (!isPositiveInteger(start) || !isPositiveInteger(count)) {
+                alert("Некорректный ввод! Ожидаются натуральные числа.");
+                return;
+            }
+            
+            const startNum = parseInt(start);
+            const countNum = parseInt(count);
+            
+            let sum = 0;
+            for (let i = 0; i < countNum; i++) {
+                const n = startNum + i;
+                sum += Math.pow(n - 2, 2);
+            }
+            
+            document.getElementById("sequenceResult").textContent = sum;
+        }
+        
+        // Проверка, является ли строка натуральным числом
+        function isPositiveInteger(str) {
+            if (typeof str != "string") return false;
+            
+            // Проверка на нечисловые символы
+            const num = str.trim();
+            if (num === "") return false;
+            
+            for (let i = 0; i < num.length; i++) {
+                const c = num.charAt(i);
+                if (c < '0' || c > '9') return false;
+            }
+            
+            // Проверка на ноль
+            return parseInt(num) > 0;
+        }
+        
+        // Подсчет нулей в младших разрядах числа
+        function countTrailingZeros() {
+            const input = document.getElementById("numberInput").value.trim();
+            
+            if (!isValidNumberInput(input)) {
+                alert("Некорректный ввод! Ожидается натуральное число больше 9.");
+                return;
+            }
+            
+            // Преобразуем в строку для работы с цифрами
+            const numStr = input;
+            let zeroCount = 0;
+            
+            // Идем с конца строки
+            for (let i = numStr.length - 1; i >= 0; i--) {
+                if (numStr[i] === '0') {
+                    zeroCount++;
+                } else {
+                    break; // Прерываем при первой ненулевой цифре
+                }
+            }
+            
+            document.getElementById("zeroCount").textContent = zeroCount;
+        }
+        
+        // Функция-исполнитель для подсчета нулей (использует массив)
+        function countTrailingZerosWithArray(number) {
+            // Преобразуем число в массив цифр
+            const digits = Array.from(String(number), Number);
+            
+            let zeroCount = 0;
+            
+            // Идем с конца массива
+            for (let i = digits.length - 1; i >= 0; i--) {
+                if (digits[i] === 0) {
+                    zeroCount++;
+                } else {
+                    break; // Прерываем при первой ненулевой цифре
+                }
+            }
+            
+            return zeroCount;
+        }
+        
+        // Проверка корректности ввода числа (N > 9)
+        function isValidNumberInput(str) {
+            if (typeof str != "string") return false;
+            
+            const num = str.trim();
+            if (num === "") return false;
+            
+            // Проверка на нечисловые символы
+            for (let i = 0; i < num.length; i++) {
+                const c = num.charAt(i);
+                if (c < '0' || c > '9') return false;
+            }
+            
+            // Проверка на длину (минимум 2 цифры) и что число > 9
+            return num.length >= 2 && parseInt(num) > 9;
+        }
+    </script>
+</body>
+</html>
